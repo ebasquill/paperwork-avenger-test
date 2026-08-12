@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Word Counter" />
+  <title>Word Counter</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f4f4f4;
+      color: #111;
+    }
+    .card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; font-size: 28px; }
+    label { display:block; font-weight: 700; margin-bottom: 8px; }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 22px;
+      padding: 12px;
+      border: 1px solid #bbb;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+    .count {
+      font-size: 64px;
+      font-weight: 800;
+      text-align:center;
+      margin: 18px 0 4px;
+    }
+    .target {
+      text-align:center;
+      font-size:18px;
+      margin-bottom:20px;
+    }
+    button {
+      width:100%;
+      font-size:22px;
+      font-weight:700;
+      padding:16px;
+      margin-top:10px;
+      border:0;
+      border-radius:12px;
+    }
+    #startBtn { background:#111; color:#fff; }
+    #stopBtn { background:#ddd; color:#111; }
+    #stopBtn:disabled, #startBtn:disabled { opacity:.45; }
+    .status {
+      margin-top:18px;
+      padding:12px;
+      border-radius:10px;
+      background:#f0f0f0;
+      font-size:16px;
+    }
+    .debug {
+      margin-top:16px;
+      font-size:14px;
+      color:#555;
+    }
+    #heard {
+      white-space:pre-wrap;
+      word-break:break-word;
+      max-height:180px;
+      overflow:auto;
+      border-top:1px solid #eee;
+      padding-top:10px;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Word Counter — Step One</h1>
+
+  <label for="word">Word to count</label>
+  <input id="word" value="airplane" autocomplete="off" autocapitalize="none" />
+
+  <div class="count" id="count">0</div>
+  <div class="target">times heard</div>
+
+  <button id="startBtn">START LISTENING</button>
+  <button id="stopBtn" disabled>STOP</button>
+
+  <div class="status" id="status">Ready.</div>
+
+  <div class="debug">
+    <strong>What the browser heard:</strong>
+    <div id="heard">Nothing yet.</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const wordInput = document.getElementById('word');
+  const countEl = document.getElementById('count');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const statusEl = document.getElementById('status');
+  const heardEl = document.getElementById('heard');
+
+  let recognition = null;
+  let desiredListening = false;
+  let count = 0;
+  let transcriptLog = [];
+
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function countTargetIn(text) {
+    const target = wordInput.value.trim().toLowerCase();
+    if (!target) return 0;
+
+    // Count whole-word/whole-phrase matches only.
+    const pattern = new RegExp(
+      `(^|[^a-z0-9'])${escapeRegExp(target)}(?=$|[^a-z0-9'])`,
+      'gi'
+    );
+    return (text.match(pattern) || []).length;
+  }
+
+  function renderHeard() {
+    heardEl.textContent = transcriptLog.length
+      ? transcriptLog.slice(-12).join('\n')
+      : 'Nothing yet.';
+  }
+
+  function buildRecognition() {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      statusEl.textContent = 'Listening…';
+    };
+
+    recognition.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) continue;
+        const text = event.results[i][0].transcript.trim();
+        transcriptLog.push(text);
+        count += countTargetIn(text);
+        countEl.textContent = count;
+        renderHeard();
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        desiredListening = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        statusEl.textContent =
+          'Microphone or speech recognition was blocked. Check Safari permissions.';
+      } else if (event.error === 'no-speech') {
+        statusEl.textContent = 'Still listening… no speech detected.';
+      } else {
+        statusEl.textContent = `Speech recognition error: ${event.error}`;
+      }
+    };
+
+    recognition.onend = () => {
+      // Mobile browsers sometimes end recognition on their own.
+      // If the user has not pressed STOP, try to resume.
+      if (desiredListening) {
+        statusEl.textContent = 'Reconnecting listener…';
+        setTimeout(() => {
+          try { recognition.start(); }
+          catch (e) {
+            statusEl.textContent = 'Could not restart automatically. Tap START again.';
+            desiredListening = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+          }
+        }, 350);
+      } else {
+        statusEl.textContent = `Stopped. Final count: ${count}.`;
+      }
+    };
+  }
+
+  if (!SpeechRecognition) {
+    startBtn.disabled = true;
+    statusEl.textContent =
+      'This browser does not expose SpeechRecognition. Try current Safari on iPhone.';
+    return;
+  }
+
+  buildRecognition();
+
+  startBtn.addEventListener('click', () => {
+    const target = wordInput.value.trim();
+    if (!target) {
+      statusEl.textContent = 'Enter a word first.';
+      return;
+    }
+
+    count = 0;
+    transcriptLog = [];
+    countEl.textContent = '0';
+    renderHeard();
+
+    desiredListening = true;
+    wordInput.disabled = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+
+    try {
+      recognition.start();
+    } catch (e) {
+      statusEl.textContent = 'Could not start speech recognition.';
+      desiredListening = false;
+      wordInput.disabled = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+  });
+
+  stopBtn.addEventListener('click', () => {
+    desiredListening = false;
+    wordInput.disabled = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+
+    try { recognition.stop(); }
+    catch (e) {
+      statusEl.textContent = `Stopped. Final count: ${count}.`;
+    }
+  });
+})();
+</script>
+</body>
+</html>
