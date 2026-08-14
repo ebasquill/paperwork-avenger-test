@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Squirrel Prompt" />
+  <title>Squirrel Prompt Builder</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;padding:20px;background:#f4f4f4;color:#111}
+    .card{max-width:560px;margin:0 auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+    h1{margin:0 0 18px;font-size:28px}
+    label{display:block;font-weight:700;margin:16px 0 8px}
+    textarea,input{width:100%;box-sizing:border-box;font:inherit;border:1px solid #bbb;border-radius:10px;padding:12px;background:#fff;color:#111}
+    textarea{min-height:110px;resize:vertical}
+    input{font-size:20px}
+    button{width:100%;font-size:20px;font-weight:700;padding:15px;margin-top:10px;border:0;border-radius:12px}
+    #startBtn,#copyBtn{background:#111;color:#fff}
+    #stopBtn{background:#ddd;color:#111}
+    button:disabled{opacity:.45}
+    .status{margin-top:16px;padding:12px;border-radius:10px;background:#f0f0f0;font-size:16px}
+    .timer{text-align:center;font-size:44px;font-weight:800;margin:18px 0 6px}
+    #promptOutput{white-space:pre-wrap;word-break:break-word;min-height:180px}
+    .small{font-size:13px;color:#666;margin-top:8px}
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Squirrel Prompt Builder</h1>
+
+  <label for="sessionPrompt">What do you want the AI to do with what it hears?</label>
+  <textarea id="sessionPrompt">Find funny or creative sideways associations in this conversation. Look for double meanings, homophones, sounds inside words, literal interpretations, odd decompositions, names with other associations, or collisions between nearby ideas. Give me 3 short candidate riffs. They should initially feel like non sequiturs but become understandable once the connection is noticed.</textarea>
+
+  <label for="minutes">Listening time in minutes</label>
+  <input id="minutes" type="number" min="0.1" step="0.1" value="2" />
+
+  <div class="timer" id="timer">2:00</div>
+
+  <button id="startBtn">START LISTENING</button>
+  <button id="stopBtn" disabled>STOP EARLY</button>
+
+  <div class="status" id="status">Ready.</div>
+
+  <label for="promptOutput">Ready-to-copy AI prompt</label>
+  <textarea id="promptOutput" readonly placeholder="After listening, your prompt will appear here."></textarea>
+  <button id="copyBtn" disabled>COPY PROMPT</button>
+
+  <div class="small">This version does not call any AI service. It only listens, builds the prompt, and copies it for you.</div>
+</div>
+
+<script>
+(() => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const sessionPromptEl = document.getElementById('sessionPrompt');
+  const minutesEl = document.getElementById('minutes');
+  const timerEl = document.getElementById('timer');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const statusEl = document.getElementById('status');
+  const promptOutputEl = document.getElementById('promptOutput');
+  const copyBtn = document.getElementById('copyBtn');
+
+  let recognition = null;
+  let desiredListening = false;
+  let transcriptLog = [];
+  let endTime = null;
+  let timerInterval = null;
+
+  function secondsFromInput() {
+    const minutes = parseFloat(minutesEl.value);
+    if (!Number.isFinite(minutes) || minutes <= 0) return 120;
+    return Math.max(1, Math.round(minutes * 60));
+  }
+
+  function formatTime(seconds) {
+    seconds = Math.max(0, seconds);
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function updateIdleTimer() {
+    timerEl.textContent = formatTime(secondsFromInput());
+  }
+
+  function buildPrompt() {
+    const transcript = transcriptLog.join('\n').trim();
+    const instruction = sessionPromptEl.value.trim();
+    promptOutputEl.value = `${instruction}
+
+TRANSCRIPT:
+${transcript || '[No usable speech was transcribed.]'}`;
+    copyBtn.disabled = false;
+  }
+
+  function finishSession(reason) {
+    desiredListening = false;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    endTime = null;
+
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    sessionPromptEl.disabled = false;
+    minutesEl.disabled = false;
+
+    try { recognition.stop(); } catch (e) {}
+
+    buildPrompt();
+    statusEl.textContent = reason;
+    timerEl.textContent = '0:00';
+  }
+
+  function startCountdown() {
+    const totalSeconds = secondsFromInput();
+    endTime = Date.now() + totalSeconds * 1000;
+    timerEl.textContent = formatTime(totalSeconds);
+
+    timerInterval = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+      timerEl.textContent = formatTime(remaining);
+      if (remaining <= 0) finishSession('Time is up. Prompt ready.');
+    }, 250);
+  }
+
+  function buildRecognition() {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      if (desiredListening) statusEl.textContent = 'Listening…';
+    };
+
+    recognition.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) continue;
+        const text = event.results[i][0].transcript.trim();
+        if (text) transcriptLog.push(text);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        desiredListening = false;
+        clearInterval(timerInterval);
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        sessionPromptEl.disabled = false;
+        minutesEl.disabled = false;
+        statusEl.textContent = 'Microphone or speech recognition was blocked.';
+      } else if (event.error === 'no-speech') {
+        statusEl.textContent = 'Still listening… no speech detected.';
+      } else {
+        statusEl.textContent = `Speech recognition error: ${event.error}`;
+      }
+    };
+
+    recognition.onend = () => {
+      if (desiredListening) {
+        statusEl.textContent = 'Reconnecting listener…';
+        setTimeout(() => {
+          if (!desiredListening) return;
+          try { recognition.start(); }
+          catch (e) { finishSession('Listener stopped unexpectedly. Prompt built from what was captured.'); }
+        }, 350);
+      }
+    };
+  }
+
+  if (!SpeechRecognition) {
+    startBtn.disabled = true;
+    statusEl.textContent = 'This browser does not expose SpeechRecognition. Try Safari on iPhone.';
+  } else {
+    buildRecognition();
+  }
+
+  minutesEl.addEventListener('input', () => {
+    if (!desiredListening) updateIdleTimer();
+  });
+
+  startBtn.addEventListener('click', () => {
+    transcriptLog = [];
+    promptOutputEl.value = '';
+    copyBtn.disabled = true;
+
+    desiredListening = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    sessionPromptEl.disabled = true;
+    minutesEl.disabled = true;
+
+    startCountdown();
+
+    try { recognition.start(); }
+    catch (e) { finishSession('Could not start speech recognition.'); }
+  });
+
+  stopBtn.addEventListener('click', () => {
+    finishSession('Stopped early. Prompt ready.');
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const text = promptOutputEl.value;
+    try {
+      await navigator.clipboard.writeText(text);
+      statusEl.textContent = 'Prompt copied.';
+    } catch (e) {
+      promptOutputEl.focus();
+      promptOutputEl.select();
+      document.execCommand('copy');
+      statusEl.textContent = 'Prompt copied.';
+    }
+  });
+
+  updateIdleTimer();
+})();
+</script>
+</body>
+</html>
