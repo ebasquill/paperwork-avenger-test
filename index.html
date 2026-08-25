@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Story Seeds</title>
+
+  <style>
+    :root {
+      --bg: #f4f1e8;
+      --card: #ffffff;
+      --ink: #222;
+      --muted: #666;
+      --line: #d8d8d8;
+      --soft-blue: #e8efff;
+      --score-bg: #fff8d9;
+      --score-line: #e7d27a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 16px;
+      color: var(--ink);
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--card);
+      padding: 22px;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0;
+      font-size: 38px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin: 10px 0 22px;
+      color: var(--muted);
+      font-size: 19px;
+    }
+
+    .seed-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    .seed-card {
+      flex: 1;
+      min-width: 0;
+      background: #fafafa;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .seed-card img {
+      width: 100%;
+      height: 240px;
+      object-fit: contain;
+      display: block;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .seed-label {
+      font-size: 23px;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .speak-btn {
+      width: 100%;
+      margin-top: 22px;
+      padding: 15px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--soft-blue);
+      color: #111;
+      font-size: 20px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .speech-status {
+      min-height: 24px;
+      margin: 8px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 170px;
+      margin-top: 12px;
+      padding: 14px;
+      font: inherit;
+      font-size: 18px;
+      border: 2px solid #bbb;
+      border-radius: 12px;
+      resize: vertical;
+      background: #fff;
+      color: #111;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button.action {
+      flex: 1;
+      font-size: 18px;
+      font-weight: 800;
+      padding: 14px 12px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #newSeedsBtn {
+      background: #333;
+      color: #fff;
+    }
+
+    #scoreBtn {
+      background: #ddd;
+      color: #111;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: default;
+    }
+
+    #results {
+      display: none;
+      margin-top: 24px;
+      padding: 18px;
+      background: var(--score-bg);
+      border: 2px solid var(--score-line);
+      border-radius: 14px;
+    }
+
+    .scores {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .score-box {
+      flex: 1;
+      text-align: center;
+      background: #fff;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .score-name {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .score-number {
+      font-size: 44px;
+      line-height: 1.05;
+      font-weight: 900;
+      margin: 5px 0;
+    }
+
+    #feedback {
+      font-size: 19px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+
+      .app { padding: 18px 14px; }
+
+      h1 { font-size: 34px; }
+
+      .subtitle { font-size: 17px; }
+
+      .seed-row { gap: 10px; }
+
+      .seed-card {
+        padding: 6px;
+        border-radius: 12px;
+      }
+
+      .seed-card img {
+        height: 180px;
+      }
+
+      .seed-label {
+        font-size: 18px;
+      }
+
+      textarea {
+        min-height: 150px;
+      }
+
+      .buttons {
+        gap: 8px;
+      }
+
+      button.action {
+        font-size: 17px;
+        padding: 13px 8px;
+      }
+
+      .score-number {
+        font-size: 40px;
+      }
+
+      #feedback {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <h1>Story Seeds</h1>
+    <div class="subtitle">Connect two worlds. Tell a goofy story.</div>
+
+    <div class="seed-row">
+      <div class="seed-card">
+        <img id="seedImage1" alt="" />
+        <div class="seed-label" id="seedLabel1"></div>
+      </div>
+
+      <div class="seed-card">
+        <img id="seedImage2" alt="" />
+        <div class="seed-label" id="seedLabel2"></div>
+      </div>
+    </div>
+
+    <button class="speak-btn" id="speakBtn" type="button">🎤 Speak Story</button>
+    <div class="speech-status" id="speechStatus"></div>
+
+    <textarea
+      id="story"
+      placeholder="Speak or type your story here..."
+    ></textarea>
+
+    <div class="buttons">
+      <button class="action" id="newSeedsBtn" type="button">New Seeds</button>
+      <button class="action" id="scoreBtn" type="button">Score My Story</button>
+    </div>
+
+    <div id="results">
+      <div class="scores">
+        <div class="score-box">
+          <div class="score-name">PLAY</div>
+          <div class="score-number" id="playScore">--</div>
+          <div>/100</div>
+        </div>
+
+        <div class="score-box">
+          <div class="score-name">RULES</div>
+          <div class="score-number" id="rulesScore">--</div>
+          <div>/100</div>
+        </div>
+      </div>
+
+      <div id="feedback"></div>
+    </div>
+
+    <div class="footer">Play + Rules = Invention</div>
+  </div>
+
+  <script>
+    const WORKER_URL = "https://squirrel-test.ebasquill.workers.dev";
+
+    const seeds = [
+      { name: "Artificial Intelligence", image: "AI.jpeg" },
+      { name: "Circus", image: "Circus.jpeg" },
+      { name: "Funeral", image: "Funeral.jpeg" },
+      { name: "Kindergarten", image: "Kindergarten.jpeg" },
+      { name: "Mafia", image: "Mafia.jpeg" },
+      { name: "Pirate", image: "Pirate.jpeg" },
+      { name: "Submarine", image: "Submarine.jpeg" },
+      { name: "Time Travel", image: "Time Travel.jpeg" },
+      { name: "Volcano", image: "Volcano.jpeg" },
+      { name: "Wedding", image: "Wedding.jpeg" }
+    ];
+
+    let currentSeed1;
+    let currentSeed2;
+    let recognition = null;
+    let listening = false;
+
+    function pickSeeds() {
+      let index1 = Math.floor(Math.random() * seeds.length);
+      let index2;
+
+      do {
+        index2 = Math.floor(Math.random() * seeds.length);
+      } while (index2 === index1);
+
+      currentSeed1 = seeds[index1];
+      currentSeed2 = seeds[index2];
+
+      document.getElementById("seedImage1").src = currentSeed1.image;
+      document.getElementById("seedImage1").alt = currentSeed1.name;
+      document.getElementById("seedLabel1").textContent = currentSeed1.name;
+
+      document.getElementById("seedImage2").src = currentSeed2.image;
+      document.getElementById("seedImage2").alt = currentSeed2.name;
+      document.getElementById("seedLabel2").textContent = currentSeed2.name;
+
+      document.getElementById("story").value = "";
+      document.getElementById("results").style.display = "none";
+      document.getElementById("speechStatus").textContent = "";
+    }
+
+    function setupSpeech() {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      const speakBtn = document.getElementById("speakBtn");
+      const status = document.getElementById("speechStatus");
+      const storyBox = document.getElementById("story");
+
+      if (!SpeechRecognition) {
+        speakBtn.disabled = true;
+        speakBtn.textContent = "Speech not supported here";
+        status.textContent = "You can still type your story.";
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      let finalText = "";
+
+      recognition.onstart = () => {
+        listening = true;
+        finalText = storyBox.value.trim();
+        speakBtn.textContent = "⏹ Stop Listening";
+        status.textContent = "Listening... say something ridiculous.";
+      };
+
+      recognition.onresult = (event) => {
+        let interimText = "";
+        let newFinal = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+
+          if (event.results[i].isFinal) {
+            newFinal += transcript + " ";
+          } else {
+            interimText += transcript;
+          }
+        }
+
+        if (newFinal) {
+          finalText = (finalText + " " + newFinal).trim();
+        }
+
+        storyBox.value = (finalText + " " + interimText).trim();
+      };
+
+      recognition.onerror = (event) => {
+        status.textContent = "Speech hiccup: " + event.error + ". You can type instead.";
+      };
+
+      recognition.onend = () => {
+        listening = false;
+        speakBtn.textContent = "🎤 Speak Story";
+        status.textContent = "Done listening. Edit anything the phone misunderstood.";
+      };
+
+      speakBtn.addEventListener("click", () => {
+        if (listening) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      });
+    }
+
+    async function scoreStory() {
+      const story = document.getElementById("story").value.trim();
+      const scoreBtn = document.getElementById("scoreBtn");
+
+      if (!story) {
+        alert("You have to tell a story first.");
+        return;
+      }
+
+      scoreBtn.disabled = true;
+      scoreBtn.textContent = "Scoring...";
+      document.getElementById("results").style.display = "none";
+
+      try {
+        const response = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            seed1: currentSeed1.name,
+            seed2: currentSeed2.name,
+            story: story
+          })
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "AI scoring failed.");
+        }
+
+        const result = await response.json();
+
+        if (
+          typeof result.play === "undefined" ||
+          typeof result.rules === "undefined"
+        ) {
+          throw new Error("Worker responded, but not with play/rules scores.");
+        }
+
+        document.getElementById("playScore").textContent = result.play;
+        document.getElementById("rulesScore").textContent = result.rules;
+        document.getElementById("feedback").textContent =
+          result.feedback || "The scorer forgot to be funny.";
+
+        document.getElementById("results").style.display = "block";
+        document.getElementById("results").scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        });
+
+      } catch (error) {
+        console.error(error);
+
+        document.getElementById("playScore").textContent = "?";
+        document.getElementById("rulesScore").textContent = "?";
+        document.getElementById("feedback").textContent =
+          "The AI scorer tripped over its own shoelaces. " +
+          "Your story is safe. We just need to fix the Cloudflare side.";
+
+        document.getElementById("results").style.display = "block";
+      } finally {
+        scoreBtn.disabled = false;
+        scoreBtn.textContent = "Score My Story";
+      }
+    }
+
+    document.getElementById("newSeedsBtn").addEventListener("click", pickSeeds);
+    document.getElementById("scoreBtn").addEventListener("click", scoreStory);
+
+    setupSpeech();
+    pickSeeds();
+  </script>
+</body>
+</html>
