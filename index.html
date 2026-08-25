@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Seeds</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f1e8;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      font-size: 36px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-top: -12px;
+      color: #666;
+      font-size: 18px;
+    }
+
+    .seed-row {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .seed-card {
+      flex: 1;
+      max-width: 320px;
+      background: #fafafa;
+      border: 2px solid #ddd;
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .seed-card img {
+      width: 100%;
+      height: 340px;
+      object-fit: contain;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .seed-label {
+      font-size: 25px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      box-sizing: border-box;
+      margin-top: 24px;
+      padding: 14px;
+      font-size: 18px;
+      border: 2px solid #bbb;
+      border-radius: 12px;
+      resize: vertical;
+    }
+
+    .buttons {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    button {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 13px 20px;
+      margin: 6px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #newSeedsBtn {
+      background: #333;
+      color: white;
+    }
+
+    #scoreBtn {
+      background: #ddd;
+      color: #111;
+    }
+
+    #scoreBtn:disabled {
+      opacity: 0.5;
+    }
+
+    #results {
+      display: none;
+      margin-top: 24px;
+      padding: 20px;
+      background: #fff8d9;
+      border: 2px solid #e7d27a;
+      border-radius: 14px;
+    }
+
+    .scores {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .score-box {
+      flex: 1;
+      text-align: center;
+      background: white;
+      padding: 14px;
+      border-radius: 12px;
+    }
+
+    .score-name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .score-number {
+      font-size: 42px;
+      font-weight: bold;
+    }
+
+    #feedback {
+      font-size: 19px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .seed-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .seed-card {
+        width: 100%;
+      }
+
+      .seed-card img {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <h1>Story Seeds</h1>
+  <div class="subtitle">Connect two worlds. Tell a goofy story.</div>
+
+  <div class="seed-row">
+
+    <div class="seed-card">
+      <img id="seedImage1" alt="">
+      <div class="seed-label" id="seedLabel1"></div>
+    </div>
+
+    <div class="seed-card">
+      <img id="seedImage2" alt="">
+      <div class="seed-label" id="seedLabel2"></div>
+    </div>
+
+  </div>
+
+  <textarea
+    id="story"
+    placeholder="Tell your story here..."
+  ></textarea>
+
+  <div class="buttons">
+    <button id="newSeedsBtn" onclick="pickSeeds()">New Seeds</button>
+    <button id="scoreBtn" onclick="fakeScore()">Score My Story</button>
+  </div>
+
+  <div id="results">
+
+    <div class="scores">
+
+      <div class="score-box">
+        <div class="score-name">PLAY</div>
+        <div class="score-number" id="playScore">--</div>
+        <div>/100</div>
+      </div>
+
+      <div class="score-box">
+        <div class="score-name">RULES</div>
+        <div class="score-number" id="rulesScore">--</div>
+        <div>/100</div>
+      </div>
+
+    </div>
+
+    <div id="feedback"></div>
+
+  </div>
+
+  <div class="footer">
+    Play + Rules = Invention
+  </div>
+
+</div>
+
+
+<script>
+
+const seeds = [
+  { name: "Artificial Intelligence", image: "AI.jpeg" },
+  { name: "Circus", image: "Circus.jpeg" },
+  { name: "Funeral", image: "Funeral.jpeg" },
+  { name: "Kindergarten", image: "Kindergarten.jpeg" },
+  { name: "Mafia", image: "Mafia.jpeg" },
+  { name: "Pirate", image: "Pirate.jpeg" },
+  { name: "Submarine", image: "Submarine.jpeg" },
+  { name: "Time Travel", image: "Time Travel.jpeg" },
+  { name: "Volcano", image: "Volcano.jpeg" },
+  { name: "Wedding", image: "Wedding.jpeg" }
+];
+
+let currentSeed1;
+let currentSeed2;
+
+function pickSeeds() {
+
+  let index1 = Math.floor(Math.random() * seeds.length);
+  let index2;
+
+  do {
+    index2 = Math.floor(Math.random() * seeds.length);
+  } while (index2 === index1);
+
+  currentSeed1 = seeds[index1];
+  currentSeed2 = seeds[index2];
+
+  document.getElementById("seedImage1").src = currentSeed1.image;
+  document.getElementById("seedImage1").alt = currentSeed1.name;
+
+  document.getElementById("seedLabel1").textContent = currentSeed1.name;
+
+  document.getElementById("seedImage2").src = currentSeed2.image;
+  document.getElementById("seedImage2").alt = currentSeed2.name;
+
+  document.getElementById("seedLabel2").textContent = currentSeed2.name;
+
+  document.getElementById("story").value = "";
+  document.getElementById("results").style.display = "none";
+}
+
+function fakeScore() {
+
+  const story = document.getElementById("story").value.trim();
+
+  if (!story) {
+    alert("You have to tell a story first.");
+    return;
+  }
+
+  /*
+    TEMPORARY FAKE SCORE.
+
+    We are deliberately proving that the page,
+    drawings, random seeds, and result display
+    all work before connecting Cloudflare.
+  */
+
+  const play = Math.floor(Math.random() * 41) + 50;
+  const rules = Math.floor(Math.random() * 41) + 50;
+
+  document.getElementById("playScore").textContent = play;
+  document.getElementById("rulesScore").textContent = rules;
+
+  document.getElementById("feedback").textContent =
+    "I'm not going to lie, the graphics department has seen better days. " +
+    "Still, you actually made a story out of " +
+    currentSeed1.name + " and " + currentSeed2.name +
+    ". The real AI smart-mouth arrives in the next version.";
+
+  document.getElementById("results").style.display = "block";
+}
+
+pickSeeds();
+
+</script>
+
+</body>
+</html>
