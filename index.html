@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Seeds</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f1e8;
+      margin: 0;
+      padding: 14px;
+      color: #222;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0;
+      font-size: 36px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin: 8px 0 18px;
+      color: #666;
+      font-size: 18px;
+    }
+
+    .seed-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .seed-card {
+      flex: 1;
+      min-width: 0;
+      background: #fafafa;
+      border: 2px solid #ddd;
+      border-radius: 14px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .seed-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: contain;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .seed-label {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 7px;
+    }
+
+    .story-tools {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .story-tools button {
+      flex: 1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      box-sizing: border-box;
+      margin-top: 10px;
+      padding: 14px;
+      font-size: 18px;
+      border: 2px solid #bbb;
+      border-radius: 12px;
+      resize: vertical;
+    }
+
+    .buttons {
+      text-align: center;
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 13px 16px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #speakBtn {
+      background: #e8f0ff;
+      color: #111;
+    }
+
+    #speakBtn.listening {
+      background: #ffd9d9;
+    }
+
+    #newSeedsBtn {
+      background: #333;
+      color: white;
+      flex: 1;
+    }
+
+    #scoreBtn {
+      background: #ddd;
+      color: #111;
+      flex: 1;
+    }
+
+    #scoreBtn:disabled,
+    #speakBtn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .speech-status {
+      min-height: 22px;
+      margin-top: 7px;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+
+    #results {
+      display: none;
+      margin-top: 22px;
+      padding: 18px;
+      background: #fff8d9;
+      border: 2px solid #e7d27a;
+      border-radius: 14px;
+    }
+
+    .scores {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .score-box {
+      flex: 1;
+      text-align: center;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .score-name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .score-number {
+      font-size: 40px;
+      font-weight: bold;
+    }
+
+    #feedback {
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+      }
+
+      .app {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 31px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .seed-row {
+        gap: 8px;
+      }
+
+      .seed-card {
+        padding: 6px;
+      }
+
+      .seed-card img {
+        height: 175px;
+      }
+
+      .seed-label {
+        font-size: 18px;
+      }
+
+      textarea {
+        min-height: 135px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 12px 10px;
+      }
+
+      .score-number {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <h1>Story Seeds</h1>
+  <div class="subtitle">Connect two worlds. Tell a goofy story.</div>
+
+  <div class="seed-row">
+
+    <div class="seed-card">
+      <img id="seedImage1" alt="">
+      <div class="seed-label" id="seedLabel1"></div>
+    </div>
+
+    <div class="seed-card">
+      <img id="seedImage2" alt="">
+      <div class="seed-label" id="seedLabel2"></div>
+    </div>
+
+  </div>
+
+  <div class="story-tools">
+    <button id="speakBtn" onclick="toggleSpeech()">🎤 Speak Story</button>
+  </div>
+
+  <div class="speech-status" id="speechStatus"></div>
+
+  <textarea
+    id="story"
+    placeholder="Speak or type your story here..."
+  ></textarea>
+
+  <div class="buttons">
+    <button id="newSeedsBtn" onclick="pickSeeds()">New Seeds</button>
+    <button id="scoreBtn" onclick="fakeScore()">Score My Story</button>
+  </div>
+
+  <div id="results">
+
+    <div class="scores">
+
+      <div class="score-box">
+        <div class="score-name">PLAY</div>
+        <div class="score-number" id="playScore">--</div>
+        <div>/100</div>
+      </div>
+
+      <div class="score-box">
+        <div class="score-name">RULES</div>
+        <div class="score-number" id="rulesScore">--</div>
+        <div>/100</div>
+      </div>
+
+    </div>
+
+    <div id="feedback"></div>
+
+  </div>
+
+  <div class="footer">
+    Play + Rules = Invention
+  </div>
+
+</div>
+
+
+<script>
+
+const seeds = [
+  { name: "Artificial Intelligence", image: "AI.jpeg" },
+  { name: "Circus", image: "Circus.jpeg" },
+  { name: "Funeral", image: "Funeral.jpeg" },
+  { name: "Kindergarten", image: "Kindergarten.jpeg" },
+  { name: "Mafia", image: "Mafia.jpeg" },
+  { name: "Pirate", image: "Pirate.jpeg" },
+  { name: "Submarine", image: "Submarine.jpeg" },
+  { name: "Time Travel", image: "Time Travel.jpeg" },
+  { name: "Volcano", image: "Volcano.jpeg" },
+  { name: "Wedding", image: "Wedding.jpeg" }
+];
+
+let currentSeed1;
+let currentSeed2;
+
+let recognition = null;
+let isListening = false;
+
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = "en-US";
+
+  let finalTranscript = "";
+
+  recognition.onstart = function() {
+    isListening = true;
+    finalTranscript = document.getElementById("story").value.trim();
+
+    document.getElementById("speakBtn").textContent = "⏹ Stop Listening";
+    document.getElementById("speakBtn").classList.add("listening");
+    document.getElementById("speechStatus").textContent =
+      "Listening... tell your story.";
+  };
+
+  recognition.onresult = function(event) {
+    let interimTranscript = "";
+    let newFinal = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+
+      if (event.results[i].isFinal) {
+        newFinal += transcript + " ";
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+
+    if (newFinal) {
+      if (finalTranscript && !finalTranscript.endsWith(" ")) {
+        finalTranscript += " ";
+      }
+
+      finalTranscript += newFinal;
+    }
+
+    document.getElementById("story").value =
+      finalTranscript + interimTranscript;
+  };
+
+  recognition.onerror = function(event) {
+    document.getElementById("speechStatus").textContent =
+      "Speech recognition problem: " + event.error;
+  };
+
+  recognition.onend = function() {
+    isListening = false;
+
+    document.getElementById("speakBtn").textContent = "🎤 Speak Story";
+    document.getElementById("speakBtn").classList.remove("listening");
+
+    if (
+      document.getElementById("speechStatus").textContent.startsWith("Listening")
+    ) {
+      document.getElementById("speechStatus").textContent =
+        "Done listening. Edit anything the phone misunderstood.";
+    }
+  };
+
+} else {
+  document.getElementById("speakBtn").disabled = true;
+  document.getElementById("speechStatus").textContent =
+    "Speech recognition is not available in this browser. Typing still works.";
+}
+
+
+function toggleSpeech() {
+
+  if (!recognition) {
+    return;
+  }
+
+  if (isListening) {
+    recognition.stop();
+  } else {
+    recognition.start();
+  }
+}
+
+
+function pickSeeds() {
+
+  if (isListening && recognition) {
+    recognition.stop();
+  }
+
+  let index1 = Math.floor(Math.random() * seeds.length);
+  let index2;
+
+  do {
+    index2 = Math.floor(Math.random() * seeds.length);
+  } while (index2 === index1);
+
+  currentSeed1 = seeds[index1];
+  currentSeed2 = seeds[index2];
+
+  document.getElementById("seedImage1").src = currentSeed1.image;
+  document.getElementById("seedImage1").alt = currentSeed1.name;
+  document.getElementById("seedLabel1").textContent = currentSeed1.name;
+
+  document.getElementById("seedImage2").src = currentSeed2.image;
+  document.getElementById("seedImage2").alt = currentSeed2.name;
+  document.getElementById("seedLabel2").textContent = currentSeed2.name;
+
+  document.getElementById("story").value = "";
+  document.getElementById("speechStatus").textContent = "";
+  document.getElementById("results").style.display = "none";
+}
+
+
+function fakeScore() {
+
+  if (isListening && recognition) {
+    recognition.stop();
+  }
+
+  const story = document.getElementById("story").value.trim();
+
+  if (!story) {
+    alert("You have to tell a story first.");
+    return;
+  }
+
+  const play = Math.floor(Math.random() * 41) + 50;
+  const rules = Math.floor(Math.random() * 41) + 50;
+
+  document.getElementById("playScore").textContent = play;
+  document.getElementById("rulesScore").textContent = rules;
+
+  document.getElementById("feedback").textContent =
+    "I'm not going to lie, the graphics department has seen better days. " +
+    "Still, you actually made a story out of " +
+    currentSeed1.name + " and " + currentSeed2.name +
+    ". The real AI smart-mouth arrives in the next version.";
+
+  document.getElementById("results").style.display = "block";
+}
+
+
+pickSeeds();
+
+</script>
+
+</body>
+</html>
