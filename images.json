@@ -1,0 +1,158 @@
+[
+  {
+    "name": "Artificial Intelligence",
+    "images": [
+      "AI .png",
+      "AI_Avatar.png"
+    ]
+  },
+  {
+    "name": "Artist",
+    "images": [
+      "Artist.png"
+    ]
+  },
+  {
+    "name": "Astronaut",
+    "images": [
+      "Astronaut.png"
+    ]
+  },
+  {
+    "name": "Ballet Dancer",
+    "images": [
+      "Ballet_Dancer.png"
+    ]
+  },
+  {
+    "name": "Book",
+    "images": [
+      "Book.png"
+    ]
+  },
+  {
+    "name": "Circus",
+    "images": [
+      "Circus.png",
+      "Circus_Avatar.png"
+    ]
+  },
+  {
+    "name": "Engineer",
+    "images": [
+      "Engineer.png"
+    ]
+  },
+  {
+    "name": "Eyes",
+    "images": [
+      "Eyes.png"
+    ]
+  },
+  {
+    "name": "Feet",
+    "images": [
+      "Feet.png"
+    ]
+  },
+  {
+    "name": "Flowers",
+    "images": [
+      "Flowers.png"
+    ]
+  },
+  {
+    "name": "Funeral",
+    "images": [
+      "Funeral.png",
+      "Funeral_Avatar.png"
+    ]
+  },
+  {
+    "name": "Hands",
+    "images": [
+      "Hands.png"
+    ]
+  },
+  {
+    "name": "Kindergarten",
+    "images": [
+      "Kindergarten_avatar.png"
+    ]
+  },
+  {
+    "name": "Knife",
+    "images": [
+      "Knife.png"
+    ]
+  },
+  {
+    "name": "Mafia",
+    "images": [
+      "Mafia_Avatar.png"
+    ]
+  },
+  {
+    "name": "Magic",
+    "images": [
+      "Magic.png"
+    ]
+  },
+  {
+    "name": "Medieval",
+    "images": [
+      "Medieval.png"
+    ]
+  },
+  {
+    "name": "Pirate",
+    "images": [
+      "Pirate.png",
+      "Pirate_Avatar.png"
+    ]
+  },
+  {
+    "name": "Prehistoric",
+    "images": [
+      "Prehistoric.png"
+    ]
+  },
+  {
+    "name": "Spaceship",
+    "images": [
+      "Spaceship.png"
+    ]
+  },
+  {
+    "name": "Submarine",
+    "images": [
+      "Submarine.png",
+      "Submarine_Avatar.png"
+    ]
+  },
+  {
+    "name": "Time Travel",
+    "images": [
+      "Time_Travel.png",
+      "Time_Travel_Avatar.png"
+    ]
+  },
+  {
+    "name": "Violinist",
+    "images": [
+      "Violinist.png"
+    ]
+  },
+  {
+    "name": "Volcano",
+    "images": [
+      "Volcano.png"
+    ]
+  },
+  {
+    "name": "Wizard",
+    "images": [
+      "Wizard.png"
+    ]
+  }
+]
